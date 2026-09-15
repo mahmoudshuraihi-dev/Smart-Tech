@@ -1,0 +1,401 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #ede9df;
+  --paper-raised: #f8f6f0;
+  --ink: #201d17;
+  --muted: #5f5a4e;
+  --line: #ddd6c4;
+  --mark: #24483f;
+  --mark-soft: #3a6357;
+  /* the logo mark's own fixed gradient — used only for the service-card hover glow */
+  --logo-blue: #0d7ef8;
+  --logo-violet: #ce24f7;
+  /* fixed dark surface, independent of light/dark mode — the footer, login page, brand
+     logo roundel, and the About section's dark accent blocks are deliberately dark by
+     design in BOTH themes, so they read from this pair instead of the swappable tokens
+     above (which flip meaning under [data-theme="dark"], see below) */
+  --night: #201d17;
+  --night-foreground: #f8f6f0;
+}
+
+/* dark mode palette — same warm hue family as the light tokens above, values swapped
+   under this attribute (set by ThemeProvider in lib/theme-context.tsx) so every
+   Tailwind utility built on --color-paper/-ink/etc. re-themes with no per-component changes */
+[data-theme="dark"] {
+  --paper: #1c1a14;
+  --paper-raised: #262218;
+  --ink: #f3efe4;
+  --muted: #b6ad98;
+  --line: #3a352a;
+  --mark: #4a9c85;
+  --mark-soft: #6cb8a3;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-mark: var(--mark);
+  --color-mark-soft: var(--mark-soft);
+  --color-night: var(--night);
+  --color-night-foreground: var(--night-foreground);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-cairo), "Segoe UI", sans-serif;
+}
+
+html[lang="en"] body {
+  font-family: var(--font-inter), sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-cairo), sans-serif;
+  font-weight: 800;
+}
+
+html[lang="en"] .font-display {
+  font-family: var(--font-newsreader), serif;
+  font-weight: 560;
+  font-optical-sizing: auto;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--mark);
+  color: var(--paper-raised);
+}
+
+:focus-visible {
+  outline: 2px solid var(--mark);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* dark mode: retint selection/focus toward the brand blue so they read as part of the
+   same aurora palette instead of the flat teal accent */
+[data-theme="dark"] ::selection {
+  background: color-mix(in oklch, var(--mark), var(--logo-blue) 45%);
+  color: var(--paper-raised);
+}
+
+[data-theme="dark"] :focus-visible {
+  outline-color: color-mix(in oklch, var(--mark), var(--logo-blue) 40%);
+}
+
+/* flat card: paper-raised fill + hairline border, no shadow/blur stack */
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+}
+
+/* dark mode: frosted glass instead of a flat fill, so cards read as floating over the
+   aurora glow behind them rather than just "the same card, darker" */
+[data-theme="dark"] .card {
+  background: color-mix(in oklch, var(--paper-raised) 58%, transparent);
+  backdrop-filter: blur(18px) saturate(1.18);
+  border: 1px solid color-mix(in oklch, var(--line), var(--logo-blue) 35%);
+  box-shadow:
+    inset 0 1px 0 rgba(243, 239, 228, 0.08),
+    0 8px 30px -6px color-mix(in oklch, var(--logo-blue) 30%, transparent),
+    0 4px 20px -8px color-mix(in oklch, var(--logo-violet) 25%, transparent);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+[data-theme="dark"] .card:hover {
+  border-color: color-mix(in oklch, var(--line), var(--logo-blue) 60%);
+}
+
+/* FAQ rows don't use .card (they're hand-rolled pill rows with animated corner radii) —
+   same glass recipe, plus a brand-tinted accent on the currently-open row */
+[data-theme="dark"] .faq-row {
+  background: color-mix(in oklch, var(--paper-raised) 62%, transparent);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border: 1px solid color-mix(in oklch, var(--line), var(--logo-blue) 25%);
+}
+
+[data-theme="dark"] .faq-row[data-state="open"] {
+  border-color: color-mix(in oklch, var(--line), var(--logo-violet) 55%);
+  box-shadow: 0 6px 24px -8px color-mix(in oklch, var(--logo-violet) 35%, transparent);
+}
+
+/* primary CTA buttons: the brand gradient already proven on the login page's submit
+   button, instead of a flat inverted (bg-ink) pill with no visual hierarchy in dark mode */
+[data-theme="dark"] .btn-glow {
+  background: linear-gradient(135deg, var(--logo-blue), var(--logo-violet));
+  color: #ffffff;
+  box-shadow: 0 10px 30px -8px color-mix(in oklch, var(--logo-violet) 55%, transparent);
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+[data-theme="dark"] .btn-glow:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 12px 36px -6px color-mix(in oklch, var(--logo-violet) 65%, transparent);
+}
+
+/* sticky header: opaque bg-paper would fully hide the aurora glow behind it, so it gets
+   a translucent + blurred treatment in dark mode only */
+[data-theme="dark"] .site-header,
+[data-theme="dark"] .site-header-mobile {
+  background: color-mix(in oklch, var(--paper) 72%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+/* ambient aurora glow — dark mode only decorative background layer (see
+   components/AuroraBackground.tsx). Fixed + negative z-index keeps it painted below all
+   normal in-flow content with zero scroll-driven layout cost; each blob only animates
+   transform (compositor-only, never triggers paint/layout). Built entirely from the
+   brand's own existing gradient colors, no new palette. */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  filter: blur(80px);
+}
+
+[data-theme="dark"] .aurora-blob-a {
+  opacity: 0.22;
+  inset-inline-start: -10%;
+  top: -12%;
+  width: 46vw;
+  height: 46vw;
+  background: var(--logo-blue);
+  animation: st-aurora-drift-a 13s ease-in-out infinite alternate;
+}
+
+[data-theme="dark"] .aurora-blob-b {
+  opacity: 0.2;
+  inset-inline-end: -12%;
+  top: 6%;
+  width: 40vw;
+  height: 40vw;
+  background: var(--logo-violet);
+  animation: st-aurora-drift-b 16s ease-in-out infinite alternate;
+}
+
+[data-theme="dark"] .aurora-blob-c {
+  opacity: 0.14;
+  inset-inline-start: 22%;
+  bottom: -16%;
+  width: 34vw;
+  height: 34vw;
+  background: var(--mark-soft);
+  animation: st-aurora-drift-c 19s ease-in-out infinite alternate;
+}
+
+@keyframes st-aurora-drift-a {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(6%, 8%) scale(1.08);
+  }
+}
+
+@keyframes st-aurora-drift-b {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(-8%, 6%) scale(1.05);
+  }
+}
+
+@keyframes st-aurora-drift-c {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(5%, -6%) scale(1.1);
+  }
+}
+
+/* dark mode: the footer's opaque base becomes a tall, gently-eased transparent→night
+   gradient (same smoothstep-style curve as .footer-blend, just mixing toward
+   "transparent" instead of a flat paper color) so the fixed aurora glow bleeds through
+   and fades into the footer naturally instead of being cut off by a hard opaque edge —
+   see the two divs at the top of ContactFooter.tsx. .footer-blend is hidden since this
+   gradient now owns the entire transition. */
+[data-theme="dark"] .footer-base {
+  background: linear-gradient(
+    to bottom,
+    transparent 0px,
+    color-mix(in oklch, transparent, var(--night) 8%) 40px,
+    color-mix(in oklch, transparent, var(--night) 30%) 90px,
+    color-mix(in oklch, transparent, var(--night) 62%) 150px,
+    color-mix(in oklch, transparent, var(--night) 88%) 220px,
+    var(--night) 300px
+  );
+}
+
+[data-theme="dark"] .footer-blend {
+  display: none;
+}
+
+/* static "stage light" behind the testimonials 3D ring — the one deliberate focal
+   element that gets its own dedicated glow, separate from the page-wide aurora. Not
+   animated, so no reduced-motion concerns. */
+.testimonial-ring-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+[data-theme="dark"] .testimonial-ring-glow {
+  opacity: 1;
+  background: radial-gradient(
+    ellipse 55% 70% at center,
+    color-mix(in oklch, var(--logo-blue) 35%, transparent) 0%,
+    color-mix(in oklch, var(--logo-violet) 22%, transparent) 45%,
+    transparent 75%
+  );
+  filter: blur(40px);
+}
+
+/* the aurora blobs stay pinned to the viewport while page content scrolls past them —
+   real parallax-style relative motion, exactly what prefers-reduced-motion exists to
+   guard against. Unlike .service-glow-ring/.animate-marquee* below (contained,
+   non-parallax, deliberately exempted), this is NOT added to that exemption list: the
+   blanket freeze rule already stops the drift for reduced-motion users on its own, while
+   the static glow (colors, frozen in place) still renders — no motion is lost that isn't
+   supposed to be. */
+
+.section-divider {
+  height: 1px;
+  background: var(--line);
+}
+
+/* animated gradient ring for the hovered service card, using the logo's own blue→violet
+   gradient — a thin rotating conic-gradient border, masked so only the ring shows */
+@property --st-border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.service-glow-ring {
+  background: conic-gradient(from var(--st-border-angle), var(--logo-blue), var(--logo-violet), var(--logo-blue));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 2px;
+  animation: st-spin-border 2.6s linear infinite;
+}
+
+@keyframes st-spin-border {
+  to {
+    --st-border-angle: 360deg;
+  }
+}
+
+/* infinite scrolling marquee for the About section's card showcase (see Marquee.tsx /
+   AboutShowcase.tsx) — plain CSS translation loop; --duration/--gap are per-instance
+   inputs set via arbitrary classes on each Marquee, not themeable tokens */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+  }
+}
+
+.animate-marquee {
+  animation: marquee var(--duration, 40s) linear infinite;
+}
+
+.animate-marquee-vertical {
+  animation: marquee-vertical var(--duration, 40s) linear infinite;
+}
+
+/* scroll-reveal: fade-in + slide-up, triggered once via IntersectionObserver (see Reveal.tsx) */
+.reveal-item {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 28px));
+  transition:
+    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal-item {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  /* the hover ring only rotates a color gradient in place — nothing moves in space,
+     so it doesn't carry the vestibular risk reduced-motion is meant to guard against */
+  .service-glow-ring {
+    animation-duration: 2.6s !important;
+    animation-iteration-count: infinite !important;
+  }
+  /* the About section's card marquee is small, self-contained, slow and single-direction (not
+     full-viewport, not scroll-linked parallax) — the kind of motion reduced-motion guidance is
+     most concerned with — and the same "500+" figure it's built around is also shown statically
+     in the stats bar below it, so nothing is lost by leaving this one exempt */
+  .animate-marquee,
+  .animate-marquee-vertical {
+    animation-duration: var(--duration, 40s) !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}

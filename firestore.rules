@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function isSelf(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /users/{uid} {
+      allow get: if isSelf(uid) || isAdmin();
+      allow list: if isAdmin(); // admin lists all clients for the name directory
+      allow create: if isSelf(uid)
+        && request.resource.data.role == 'client'          // self-registration can NEVER set admin
+        && request.resource.data.keys().hasOnly(['role', 'name', 'email', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.email is string;
+      allow update: if isSelf(uid)
+        && request.resource.data.role == resource.data.role // role is immutable from the client
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']);
+      allow delete: if false;
+    }
+
+    match /requests/{id} {
+      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn()
+        && request.resource.data.clientId == request.auth.uid
+        && request.resource.data.stage == 'received';
+      allow update: if isAdmin(); // stage advance / file attach are admin-only actions
+      allow delete: if false;
+    }
+
+    match /conversations/{convId} {
+      allow read: if isSignedIn() && (convId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && convId == request.auth.uid
+        && request.resource.data.clientId == request.auth.uid;
+      allow update: if isSignedIn() && (convId == request.auth.uid || isAdmin());
+      allow delete: if false;
+
+      match /messages/{msgId} {
+        allow read: if isSignedIn() && (convId == request.auth.uid || isAdmin());
+
+        // a real message from the conversation's own client
+        allow create: if isSignedIn() && convId == request.auth.uid
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.senderRole == 'client';
+
+        // a real message from the admin
+        allow create: if isAdmin()
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.senderRole == 'admin';
+
+        // bounded bot auto-reply: the client's own browser may write a message that
+        // LOOKS like it's from admin only if its text exactly equals the admin's
+        // pre-approved welcome message or one of the pre-approved FAQ answers — the
+        // set of forgeable content is fully bounded by what the admin already wrote
+        allow create: if isSignedIn() && convId == request.auth.uid
+          && request.resource.data.senderId == 'bot'
+          && request.resource.data.senderRole == 'admin'
+          && (
+            request.resource.data.text ==
+              get(/databases/$(database)/documents/config/botSettings).data.welcomeMessage
+            || request.resource.data.text in
+              get(/databases/$(database)/documents/config/botSettings).data.ruleAnswers
+          );
+
+        allow update, delete: if false; // messages are immutable once sent
+      }
+    }
+
+    match /config/botSettings {
+      allow read: if isSignedIn();  // clients need this to run findFaqMatch locally
+      allow write: if isAdmin();
+    }
+  }
+}

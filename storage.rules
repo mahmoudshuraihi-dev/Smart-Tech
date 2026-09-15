@@ -1,0 +1,19 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() {
+      return isSignedIn() &&
+        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /chat-attachments/{conversationId}/{fileName} {
+      allow read: if isSignedIn() && (conversationId == request.auth.uid || isAdmin());
+      allow write: if isSignedIn() && (conversationId == request.auth.uid || isAdmin())
+        && request.resource.size < 20 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*|application/pdf|application/msword|application/vnd[.]openxmlformats-officedocument[.].*|text/plain|application/zip|application/vnd[.]ms-excel');
+      allow delete: if false;
+    }
+  }
+}
