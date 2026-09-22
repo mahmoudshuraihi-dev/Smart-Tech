@@ -56,6 +56,7 @@ export default function AdminMessagesPage() {
                   viewerId={session.id ?? ""}
                   peerName={getClientName(directory, selected.clientId)}
                   onBack={() => setSelectedId(null)}
+                  onDeleted={() => setSelectedId(null)}
                 />
               ) : (
                 <p className="text-sm text-muted text-center p-10">{t.chat.selectConversation}</p>

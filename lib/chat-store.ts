@@ -4,6 +4,7 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   increment,
   onSnapshot,
   serverTimestamp,
@@ -13,7 +14,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "./firebase";
+import { auth, db, storage } from "./firebase";
 import { ChatAttachment, ChatMessage, ChatRole, Conversation, PaymentStatus } from "./mock-data";
 
 const CONVERSATIONS = "conversations";
@@ -195,6 +196,35 @@ export async function importMessages(
   }
 
   return messages.length;
+}
+
+export async function clearConversation(conversationId: string): Promise<void> {
+  const snap = await getDocs(messagesCollection(conversationId));
+  for (let i = 0; i < snap.docs.length; i += BATCH_LIMIT) {
+    const batch = writeBatch(db);
+    snap.docs.slice(i, i + BATCH_LIMIT).forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+  }
+  await updateDoc(conversationRef(conversationId), {
+    lastMessageAt: serverTimestamp(),
+    lastMessagePreview: "",
+    unreadForClient: 0,
+    unreadForAdmin: 0,
+  });
+}
+
+export async function deleteStudentAccount(uid: string): Promise<void> {
+  const idToken = await auth.currentUser?.getIdToken();
+  if (!idToken) throw new Error("not signed in");
+  const res = await fetch("/api/admin/delete-user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+    body: JSON.stringify({ uid }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.error ?? "delete failed");
+  }
 }
 
 export async function markRead(conversationId: string, role: ChatRole): Promise<void> {

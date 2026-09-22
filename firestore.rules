@@ -67,7 +67,8 @@ service cloud.firestore {
               get(/databases/$(database)/documents/config/botSettings).data.ruleAnswers
           );
 
-        allow update, delete: if false; // messages are immutable once sent
+        allow update: if false; // messages are immutable once sent
+        allow delete: if isAdmin(); // admin-initiated "clear conversation"
       }
     }
 

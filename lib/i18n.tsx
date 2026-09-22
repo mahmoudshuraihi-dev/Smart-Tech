@@ -169,6 +169,13 @@ export interface Dict {
     importErrorGeneric: string;
     importDone: string;
     supportTeamName: string;
+    actionsMenu: string;
+    clearConversation: string;
+    clearConversationConfirm: string;
+    deleteAccount: string;
+    deleteAccountConfirm: string;
+    actionFailed: string;
+    actionPending: string;
   };
 }
 
@@ -478,6 +485,13 @@ const translations: Record<Locale, Dict> = {
       importErrorGeneric: "تعذّرت قراءة هذا الملف. تأكد أنه ملف تصدير واتساب صالح.",
       importDone: "تم",
       supportTeamName: "فريق الدعم",
+      actionsMenu: "خيارات إضافية",
+      clearConversation: "حذف المحادثة",
+      clearConversationConfirm: "رح يتم حذف كل رسائل هذه المحادثة نهائيًا. حساب الطالب رح يضل شغال ويقدر يبلش محادثة جديدة. هذا الإجراء ما ممكن التراجع عنه.",
+      deleteAccount: "حذف حساب الطالب نهائيًا",
+      deleteAccountConfirm: "رح يتم حذف حساب هذا الطالب بالكامل نهائيًا — تسجيل الدخول، بياناته، محادثته، وكل طلباته. هذا الإجراء ما ممكن التراجع عنه أبدًا.",
+      actionFailed: "تعذّر تنفيذ الإجراء، حاول مرة أخرى.",
+      actionPending: "جارٍ التنفيذ...",
     },
   },
   en: {
@@ -715,6 +729,13 @@ const translations: Record<Locale, Dict> = {
       importErrorGeneric: "Couldn't read this file. Make sure it's a valid WhatsApp export.",
       importDone: "Done",
       supportTeamName: "Support Team",
+      actionsMenu: "More actions",
+      clearConversation: "Delete conversation",
+      clearConversationConfirm: "This permanently deletes every message in this conversation. The student's account stays active and they can start a fresh conversation. This cannot be undone.",
+      deleteAccount: "Permanently delete account",
+      deleteAccountConfirm: "This permanently deletes this student's entire account — their login, profile, conversation, and every request. This cannot be undone.",
+      actionFailed: "Couldn't complete that action — try again.",
+      actionPending: "Working...",
     },
   },
 };
