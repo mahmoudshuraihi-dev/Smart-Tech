@@ -23,6 +23,11 @@ export function getAdminApp(): App {
     throw new Error("FIREBASE_SERVICE_ACCOUNT_BASE64 is not set");
   }
   const credentials = JSON.parse(Buffer.from(encoded, "base64").toString("utf-8"));
-  app = initializeApp({ credential: cert(credentials) });
+  app = initializeApp({
+    credential: cert(credentials),
+    // the Storage Admin SDK needs this explicitly — it doesn't infer it from the service
+    // account the way the client SDK infers it from NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  });
   return app;
 }
