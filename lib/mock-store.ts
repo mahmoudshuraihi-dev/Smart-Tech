@@ -5,7 +5,6 @@ import {
   collection,
   doc,
   onSnapshot,
-  orderBy,
   query,
   runTransaction,
   serverTimestamp,
@@ -27,15 +26,20 @@ function toIso(value: unknown): string {
   return new Date().toISOString();
 }
 
+// Sorted client-side, not via a Firestore orderBy("createdAt") query — see the matching
+// comment in lib/chat-store.ts's subscribeToMessages: existing requests have a plain ISO
+// string createdAt, new ones a native Timestamp from serverTimestamp(), and Firestore's
+// orderBy sorts by value type before value, which would put every new request before every
+// old one regardless of actual time. Converting to ISO strings first and sorting here avoids
+// that, and also means this query no longer needs a composite index.
 export function subscribeToAllRequests(cb: (list: ProjectRequest[]) => void): () => void {
-  const q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
-  return onSnapshot(q, (snap) => {
-    cb(
-      snap.docs.map((d) => {
-        const data = d.data();
-        return { id: d.id, ...data, createdAt: toIso(data.createdAt) } as ProjectRequest;
-      }),
-    );
+  return onSnapshot(collection(db, COLLECTION), (snap) => {
+    const list = snap.docs.map((d) => {
+      const data = d.data();
+      return { id: d.id, ...data, createdAt: toIso(data.createdAt) } as ProjectRequest;
+    });
+    list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    cb(list);
   });
 }
 
@@ -43,18 +47,14 @@ export function subscribeToRequestsForClient(
   clientId: string,
   cb: (list: ProjectRequest[]) => void,
 ): () => void {
-  const q = query(
-    collection(db, COLLECTION),
-    where("clientId", "==", clientId),
-    orderBy("createdAt", "desc"),
-  );
+  const q = query(collection(db, COLLECTION), where("clientId", "==", clientId));
   return onSnapshot(q, (snap) => {
-    cb(
-      snap.docs.map((d) => {
-        const data = d.data();
-        return { id: d.id, ...data, createdAt: toIso(data.createdAt) } as ProjectRequest;
-      }),
-    );
+    const list = snap.docs.map((d) => {
+      const data = d.data();
+      return { id: d.id, ...data, createdAt: toIso(data.createdAt) } as ProjectRequest;
+    });
+    list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    cb(list);
   });
 }
 

@@ -6,8 +6,6 @@ import {
   getDoc,
   increment,
   onSnapshot,
-  orderBy,
-  query,
   serverTimestamp,
   setDoc,
   Timestamp,
@@ -56,14 +54,14 @@ export function subscribeToConversation(id: string, cb: (c: Conversation | null)
 }
 
 export function subscribeToAllConversations(cb: (list: Conversation[]) => void): () => void {
-  const q = query(collection(db, CONVERSATIONS), orderBy("lastMessageAt", "desc"));
-  return onSnapshot(q, (snap) => {
-    cb(
-      snap.docs.map((d) => {
-        const data = d.data();
-        return { id: d.id, ...data, lastMessageAt: toIso(data.lastMessageAt) } as Conversation;
-      }),
-    );
+  // sorted client-side (not via Firestore orderBy) — see subscribeToMessages for why
+  return onSnapshot(collection(db, CONVERSATIONS), (snap) => {
+    const list = snap.docs.map((d) => {
+      const data = d.data();
+      return { id: d.id, ...data, lastMessageAt: toIso(data.lastMessageAt) } as Conversation;
+    });
+    list.sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
+    cb(list);
   });
 }
 
@@ -95,14 +93,18 @@ export async function setPaymentStatus(conversationId: string, status: PaymentSt
 }
 
 export function subscribeToMessages(conversationId: string, cb: (msgs: ChatMessage[]) => void): () => void {
-  const q = query(messagesCollection(conversationId), orderBy("sentAt", "asc"));
-  return onSnapshot(q, (snap) => {
-    cb(
-      snap.docs.map((d) => {
-        const data = d.data();
-        return { id: d.id, conversationId, ...data, sentAt: toIso(data.sentAt) } as ChatMessage;
-      }),
-    );
+  // Sorted client-side, not via a Firestore orderBy("sentAt") query: existing messages were
+  // written with a plain ISO string, new ones with serverTimestamp() (a native Timestamp) —
+  // Firestore's orderBy sorts by value TYPE before value, so a query-level sort would put every
+  // new (Timestamp-typed) message before every old (string-typed) one regardless of actual
+  // time. Converting both to ISO strings via toIso() first and sorting here sidesteps that.
+  return onSnapshot(messagesCollection(conversationId), (snap) => {
+    const list = snap.docs.map((d) => {
+      const data = d.data();
+      return { id: d.id, conversationId, ...data, sentAt: toIso(data.sentAt) } as ChatMessage;
+    });
+    list.sort((a, b) => a.sentAt.localeCompare(b.sentAt));
+    cb(list);
   });
 }
 
