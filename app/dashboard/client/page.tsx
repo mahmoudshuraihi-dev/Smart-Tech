@@ -7,10 +7,11 @@ import AuroraBackground from "@/components/AuroraBackground";
 import Navbar from "@/components/Navbar";
 import ProgressBar from "@/components/ProgressBar";
 import Timeline from "@/components/Timeline";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { subscribeToRequestsForClient } from "@/lib/mock-store";
-import { ProjectRequest } from "@/lib/mock-data";
+import { subscribeToRequestsForClient } from "@/lib/request-store";
+import { ProjectRequest } from "@/lib/models";
 import { IconDownload } from "@/components/icons";
 
 export default function ClientDashboard() {
@@ -44,6 +45,7 @@ export default function ClientDashboard() {
       <Navbar />
       <main className="flex-1">
         <div className="mx-auto max-w-4xl px-5 sm:px-8 py-14">
+          <EmailVerificationBanner />
           <h1 className="font-display text-2xl sm:text-3xl">{t.dashboardClient.heading}</h1>
           <p className="text-muted mt-2">{t.dashboardClient.subheading}</p>
 

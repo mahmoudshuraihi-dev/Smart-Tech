@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useReducedMotion, AnimatePresence, motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
-import type { ChatMessage, ChatRole, PaymentStatus } from "@/lib/mock-data";
-import { BOT_SENDER_ID } from "@/lib/mock-data";
+import type { ChatMessage, ChatRole, PaymentStatus } from "@/lib/models";
+import { BOT_SENDER_ID } from "@/lib/models";
 import {
   subscribeToMessages,
   subscribeToConversation,

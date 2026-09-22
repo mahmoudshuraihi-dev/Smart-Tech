@@ -2,7 +2,7 @@
 
 import { collection, doc, getDocs, setDoc, writeBatch } from "firebase/firestore";
 import { db } from "./firebase";
-import { ChatMessage } from "./mock-data";
+import { ChatMessage } from "./models";
 
 const COLLECTION = "pendingImports";
 const BATCH_LIMIT = 500;

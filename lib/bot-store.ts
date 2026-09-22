@@ -2,7 +2,7 @@
 
 import { doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
-import { AutoReplyRule, BotSettings } from "./mock-data";
+import { AutoReplyRule, BotSettings } from "./models";
 
 const REF_PATH = ["config", "botSettings"] as const;
 

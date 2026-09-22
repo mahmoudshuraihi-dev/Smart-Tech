@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n";
-import type { Conversation } from "@/lib/mock-data";
+import type { Conversation } from "@/lib/models";
 import { getClientName } from "@/lib/user-directory";
 import { PaymentBadge } from "./PaymentBadge";
 

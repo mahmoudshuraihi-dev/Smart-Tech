@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n, ServiceCopy } from "@/lib/i18n";
-import { createRequest } from "@/lib/mock-store";
+import { createRequest } from "@/lib/request-store";
 import { IconEdit, IconChart, IconCompass, IconBooks, IconClock, IconArrow } from "./icons";
 
 const ICONS: Record<string, typeof IconEdit> = {

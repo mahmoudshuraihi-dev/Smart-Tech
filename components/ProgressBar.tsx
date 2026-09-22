@@ -1,6 +1,6 @@
 "use client";
 
-import { STAGES, Stage } from "@/lib/mock-data";
+import { STAGES, Stage } from "@/lib/models";
 
 export function stageProgress(stage: Stage): number {
   const idx = STAGES.indexOf(stage);

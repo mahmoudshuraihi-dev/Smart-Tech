@@ -33,6 +33,24 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Lightweight self-hosted error log (see lib/error-reporter.ts + app/api/log-error/route.ts).
+    // All writes happen server-side via the Admin SDK, which bypasses these rules — the public
+    // API route enforces its own payload-size cap and rate limit before writing, so no client
+    // write path needs to be opened here at all.
+    match /errorLogs/{logId} {
+      allow read, list, delete: if isAdmin(); // delete lets an admin clear reviewed entries
+      allow create, update: if false;
+    }
+
+    // Audit trail for pending-import claims (see app/api/admin/claim-pending-import/route.ts) —
+    // written server-side via the Admin SDK at claim time so an admin can check which account
+    // absorbed which pre-imported WhatsApp history, in case normalizePhone's digits-only
+    // comparison ever attaches the wrong person's chat log to the wrong new student.
+    match /pendingImportClaims/{claimId} {
+      allow read, list, delete: if isAdmin();
+      allow create, update: if false;
+    }
+
     match /conversations/{convId} {
       allow read: if isSignedIn() && (convId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && convId == request.auth.uid

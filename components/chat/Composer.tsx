@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, KeyboardEvent } from "react";
 import { useI18n } from "@/lib/i18n";
-import { MAX_ATTACHMENT_BYTES } from "@/lib/mock-data";
+import { MAX_ATTACHMENT_BYTES } from "@/lib/models";
 import { IconSend, IconPaperclip, IconFile, IconClose } from "@/components/icons";
 
 interface PendingFile {

@@ -8,6 +8,8 @@ import {
   browserSessionPersistence,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
   signOut,
   type User,
 } from "firebase/auth";
@@ -19,6 +21,7 @@ export type Role = "client" | "admin" | null;
 interface Session {
   role: Role;
   id: string | null;
+  emailVerified: boolean;
 }
 
 type AuthResult = { ok: true; id: string } | { ok: false; error: string };
@@ -29,6 +32,8 @@ interface AuthContextValue {
   login: (email: string, password: string, remember?: boolean) => Promise<AuthResult>;
   signup: (name: string, phone: string, email: string, password: string, remember?: boolean) => Promise<AuthResult>;
   logout: () => Promise<void>;
+  resendVerification: () => Promise<AuthResult>;
+  resetPassword: (email: string) => Promise<AuthResult>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -54,7 +59,7 @@ function mapAuthError(e: unknown): string {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session>({ role: null, id: null });
+  const [session, setSession] = useState<Session>({ role: null, id: null, emailVerified: false });
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -63,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubAuth = onAuthStateChanged(auth, (user: User | null) => {
       unsubRole?.();
       if (!user) {
-        setSession({ role: null, id: null });
+        setSession({ role: null, id: null, emailVerified: false });
         setReady(true);
         return;
       }
@@ -71,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Firebase console takes effect immediately in an already-open tab, no re-login needed
       unsubRole = onSnapshot(doc(db, "users", user.uid), (snap) => {
         const role = (snap.data()?.role as Exclude<Role, null>) ?? "client";
-        setSession({ role, id: user.uid });
+        setSession({ role, id: user.uid, emailVerified: user.emailVerified });
         setReady(true);
       });
     });
@@ -102,6 +107,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
       const cred = await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+
+      try {
+        await sendEmailVerification(cred.user);
+      } catch {
+        // best-effort — signup itself must not fail just because the verification email didn't send
+      }
+
       await setDoc(doc(db, "users", cred.user.uid), {
         role: "client",
         name,
@@ -134,8 +146,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth);
   };
 
+  const resendVerification = async (): Promise<AuthResult> => {
+    const user = auth.currentUser;
+    if (!user) return { ok: false, error: "generic" };
+    try {
+      await sendEmailVerification(user);
+      return { ok: true, id: user.uid };
+    } catch (e) {
+      return { ok: false, error: mapAuthError(e) };
+    }
+  };
+
+  // Enumeration-safe: Firebase throws "auth/user-not-found" for an unregistered email, but we
+  // report the same success either way so a visitor can't use this to discover which emails
+  // have an account here.
+  const resetPassword = async (email: string): Promise<AuthResult> => {
+    try {
+      await sendPasswordResetEmail(auth, email.trim().toLowerCase());
+      return { ok: true, id: "" };
+    } catch (e) {
+      const code = e instanceof Error && "code" in e ? String((e as { code?: string }).code) : "";
+      if (code === "auth/user-not-found") return { ok: true, id: "" };
+      return { ok: false, error: mapAuthError(e) };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ session, ready, login, signup, logout }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider
+      value={{ session, ready, login, signup, logout, resendVerification, resetPassword }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
 }
 

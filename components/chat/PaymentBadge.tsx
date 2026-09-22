@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n";
-import type { PaymentStatus } from "@/lib/mock-data";
+import type { PaymentStatus } from "@/lib/models";
 
 const STATUS_META: Record<PaymentStatus, { dot: string; bg: string; text: string; border: string; labelKey: "paymentPaid" | "paymentUnpaid" | "paymentPartial" }> = {
   paid: { dot: "bg-mark", bg: "bg-mark/12", text: "text-mark", border: "border-mark/30", labelKey: "paymentPaid" },

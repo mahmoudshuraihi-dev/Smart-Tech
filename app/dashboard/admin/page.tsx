@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import AuroraBackground from "@/components/AuroraBackground";
 import Navbar from "@/components/Navbar";
 import ProgressBar from "@/components/ProgressBar";
 import Timeline from "@/components/Timeline";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { subscribeToAllRequests, advanceStage, attachFile } from "@/lib/mock-store";
-import { ProjectRequest, STAGES } from "@/lib/mock-data";
+import { subscribeToAllRequests, advanceStage, attachFile } from "@/lib/request-store";
+import { ProjectRequest, STAGES } from "@/lib/models";
 import { useClientDirectory, getClientName } from "@/lib/user-directory";
-import { IconUpload } from "@/components/icons";
+import { IconUpload, IconArrow } from "@/components/icons";
 
 export default function AdminDashboard() {
   const { session, ready } = useAuth();
@@ -72,8 +74,20 @@ export default function AdminDashboard() {
       <Navbar />
       <main className="flex-1">
         <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14">
-          <h1 className="font-display text-2xl sm:text-3xl">{t.dashboardAdmin.heading}</h1>
-          <p className="text-muted mt-2">{t.dashboardAdmin.subheading}</p>
+          <EmailVerificationBanner />
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="font-display text-2xl sm:text-3xl">{t.dashboardAdmin.heading}</h1>
+              <p className="text-muted mt-2">{t.dashboardAdmin.subheading}</p>
+            </div>
+            <Link
+              href="/dashboard/admin/errors"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-mark hover:text-ink transition-colors"
+            >
+              {t.errorsPage.navLink}
+              <IconArrow className="h-4 w-4 rtl:rotate-180" />
+            </Link>
+          </div>
 
           <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_1.4fr]">
             <div className="card rounded-md overflow-hidden">

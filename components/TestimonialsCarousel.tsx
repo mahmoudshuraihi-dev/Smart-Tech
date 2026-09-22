@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import type { TestimonialCopy } from "@/lib/i18n";
@@ -54,7 +54,7 @@ export default function TestimonialsCarousel({ items }: { items: TestimonialCopy
   const containerRef = useRef<HTMLDivElement>(null);
   const [rotation, setRotation] = useState(0);
   const [radius, setRadius] = useState(160);
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   const numImages = items.length || 1;
   const angleStep = 360 / numImages;
@@ -62,10 +62,6 @@ export default function TestimonialsCarousel({ items }: { items: TestimonialCopy
   const steps = Math.round(rotation / angleStep);
   const centerIndex = ((-steps % numImages) + numImages) % numImages;
   const centerItem = items[centerIndex];
-
-  useEffect(() => {
-    setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
 
   useEffect(() => {
     const updateRadius = () => {

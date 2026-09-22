@@ -13,7 +13,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { ProjectRequest, STAGES, ServiceId } from "./mock-data";
+import { ProjectRequest, STAGES, ServiceId } from "./models";
 
 const COLLECTION = "requests";
 

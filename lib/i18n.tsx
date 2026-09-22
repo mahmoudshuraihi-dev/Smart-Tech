@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import type { Stage, ServiceId } from "./mock-data";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore, ReactNode } from "react";
+import type { Stage, ServiceId } from "./models";
 
 export type Locale = "ar" | "en";
 
@@ -81,8 +81,10 @@ export interface Dict {
     subheadingSignup: string;
     nameLabel: string;
     phoneLabel: string;
+    phoneHint: string;
     emailLabel: string;
     passwordLabel: string;
+    passwordHint: string;
     submit: string;
     submitSignup: string;
     switchToSignup: string;
@@ -90,6 +92,8 @@ export interface Dict {
     errorInvalidCredential: string;
     errorEmailInUse: string;
     errorWeakPassword: string;
+    errorWeakPasswordCustom: string;
+    errorPhoneImplausible: string;
     errorTooManyRequests: string;
     errorNetwork: string;
     errorGeneric: string;
@@ -97,7 +101,16 @@ export interface Dict {
     remember: string;
     showPassword: string;
     hidePassword: string;
-    continueWith: string;
+    forgotPassword: string;
+    resetHeading: string;
+    resetSubheading: string;
+    resetSubmit: string;
+    resetSentMessage: string;
+    backToLogin: string;
+    verifyEmailBanner: string;
+    verifyEmailResend: string;
+    verifyEmailSent: string;
+    verifyEmailRefresh: string;
   };
   stages: Record<Stage, string>;
   dashboardClient: {
@@ -128,7 +141,24 @@ export interface Dict {
     doneAll: string;
   };
   footer: { rights: string; tagline: string; quickLinks: string; company: string };
-  common: { backHome: string };
+  common: { backHome: string; loading: string };
+  errors: {
+    boundaryHeading: string;
+    boundaryBody: string;
+    tryAgain: string;
+  };
+  errorsPage: {
+    heading: string;
+    subheading: string;
+    empty: string;
+    dismiss: string;
+    navLink: string;
+    claimsHeading: string;
+    claimsSubheading: string;
+    claimsEmpty: string;
+    claimedBy: string;
+    claimMessages: string;
+  };
   chat: {
     heading: string;
     placeholder: string;
@@ -178,6 +208,8 @@ export interface Dict {
     actionFailed: string;
     actionPending: string;
     importPhoneLabel: string;
+    importPhoneHint: string;
+    importPhoneImplausible: string;
     importNameHintLabel: string;
   };
   pendingImports: {
@@ -398,8 +430,10 @@ const translations: Record<Locale, Dict> = {
       subheadingSignup: "أنشئ حسابًا لمتابعة طلباتك والتواصل مع فريقنا.",
       nameLabel: "الاسم",
       phoneLabel: "رقم الهاتف",
+      phoneHint: "اكتب رمز الدولة مع الرقم، مثل 9665XXXXXXXX.",
       emailLabel: "البريد الإلكتروني",
       passwordLabel: "كلمة المرور",
+      passwordHint: "8 أحرف على الأقل، وتشمل حرفًا ورقمًا.",
       submit: "دخول",
       submitSignup: "إنشاء الحساب",
       switchToSignup: "ليس لديك حساب؟ أنشئ حسابًا",
@@ -407,6 +441,8 @@ const translations: Record<Locale, Dict> = {
       errorInvalidCredential: "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
       errorEmailInUse: "هذا البريد الإلكتروني مستخدم بالفعل — جرّب تسجيل الدخول بدلاً من ذلك.",
       errorWeakPassword: "كلمة المرور ضعيفة جدًا — يجب أن تتكون من 6 أحرف على الأقل.",
+      errorWeakPasswordCustom: "كلمة المرور يجب أن تتكون من 8 أحرف على الأقل، وتشمل حرفًا ورقمًا.",
+      errorPhoneImplausible: "رقم الهاتف قصير جدًا — تأكد من كتابة رمز الدولة معه.",
       errorTooManyRequests: "محاولات كثيرة جدًا، حاول مرة أخرى بعد قليل.",
       errorNetwork: "تعذّر الاتصال بالخادم، تحقق من اتصالك بالإنترنت.",
       errorGeneric: "حدث خطأ غير متوقع، حاول مرة أخرى.",
@@ -414,7 +450,16 @@ const translations: Record<Locale, Dict> = {
       remember: "تذكرني",
       showPassword: "إظهار كلمة المرور",
       hidePassword: "إخفاء كلمة المرور",
-      continueWith: "أو تابع عبر",
+      forgotPassword: "نسيت كلمة المرور؟",
+      resetHeading: "استرجاع كلمة المرور",
+      resetSubheading: "اكتب بريدك الإلكتروني وبنرسلّك رابط لإعادة تعيين كلمة المرور.",
+      resetSubmit: "إرسال رابط الاسترجاع",
+      resetSentMessage: "إذا كان هذا البريد مسجّل عندنا، رح يوصلك رابط لإعادة تعيين كلمة المرور خلال دقائق.",
+      backToLogin: "الرجوع لتسجيل الدخول",
+      verifyEmailBanner: "لسا ما أكدت بريدك الإلكتروني — تحقّق من صندوق الوارد.",
+      verifyEmailResend: "إعادة إرسال رسالة التأكيد",
+      verifyEmailSent: "تم إرسال رسالة التأكيد.",
+      verifyEmailRefresh: "أكدت بريدي — تحديث",
     },
     stages: {
       received: "تم استلام الطلب",
@@ -456,7 +501,24 @@ const translations: Record<Locale, Dict> = {
       quickLinks: "روابط سريعة",
       company: "الشركة",
     },
-    common: { backHome: "العودة للرئيسية" },
+    common: { backHome: "العودة للرئيسية", loading: "جارٍ التحميل..." },
+    errors: {
+      boundaryHeading: "حدث خطأ غير متوقع",
+      boundaryBody: "نعتذر عن الخلل. جرّب مرة أخرى، أو رجع للرئيسية.",
+      tryAgain: "حاول مرة أخرى",
+    },
+    errorsPage: {
+      heading: "سجل الأخطاء",
+      subheading: "الأخطاء التقنية يلي حصلت على الموقع تلقائيًا — للمتابعة الفنية فقط.",
+      empty: "لا توجد أخطاء مسجّلة.",
+      dismiss: "إخفاء",
+      navLink: "سجل الأخطاء",
+      claimsHeading: "سجل ربط محادثات واتساب",
+      claimsSubheading: "كل مرة انربطت فيها محادثة واتساب مستوردة مسبقًا بحساب طالب جديد — راجعها إذا شكيت إنه رقم اتربط بحساب غلط.",
+      claimsEmpty: "لا يوجد ربط محادثات بعد.",
+      claimedBy: "ارتبطت بحساب",
+      claimMessages: "رسالة",
+    },
     chat: {
       heading: "المحادثات",
       placeholder: "اكتب رسالة...",
@@ -506,6 +568,8 @@ const translations: Record<Locale, Dict> = {
       actionFailed: "تعذّر تنفيذ الإجراء، حاول مرة أخرى.",
       actionPending: "جارٍ التنفيذ...",
       importPhoneLabel: "رقم هاتف الطالب (واتساب)",
+      importPhoneHint: "اكتب رمز الدولة مع الرقم، مثل 9665XXXXXXXX — نفس الصيغة يلي رح يستخدمها الطالب وقت التسجيل.",
+      importPhoneImplausible: "رقم الهاتف قصير جدًا — تأكد من كتابة رمز الدولة معه.",
       importNameHintLabel: "اسم الطالب (للتنظيم عندك فقط)",
     },
     pendingImports: {
@@ -654,8 +718,10 @@ const translations: Record<Locale, Dict> = {
       subheadingSignup: "Create an account to track requests and message our team.",
       nameLabel: "Name",
       phoneLabel: "Phone number",
+      phoneHint: "Include your country code, e.g. 9665XXXXXXXX.",
       emailLabel: "Email",
       passwordLabel: "Password",
+      passwordHint: "At least 8 characters, including a letter and a number.",
       submit: "Log In",
       submitSignup: "Create Account",
       switchToSignup: "Don't have an account? Sign up",
@@ -663,6 +729,8 @@ const translations: Record<Locale, Dict> = {
       errorInvalidCredential: "Incorrect email or password.",
       errorEmailInUse: "That email is already in use — try logging in instead.",
       errorWeakPassword: "That password is too weak — use at least 6 characters.",
+      errorWeakPasswordCustom: "Password must be at least 8 characters and include a letter and a number.",
+      errorPhoneImplausible: "That phone number looks too short — make sure to include the country code.",
       errorTooManyRequests: "Too many attempts — please try again shortly.",
       errorNetwork: "Couldn't reach the server — check your internet connection.",
       errorGeneric: "Something went wrong — please try again.",
@@ -670,7 +738,16 @@ const translations: Record<Locale, Dict> = {
       remember: "Remember me",
       showPassword: "Show password",
       hidePassword: "Hide password",
-      continueWith: "Or continue with",
+      forgotPassword: "Forgot password?",
+      resetHeading: "Reset your password",
+      resetSubheading: "Enter your email and we'll send you a link to reset your password.",
+      resetSubmit: "Send reset link",
+      resetSentMessage: "If that email has an account with us, a reset link is on its way — check your inbox in a few minutes.",
+      backToLogin: "Back to login",
+      verifyEmailBanner: "You haven't verified your email yet — check your inbox.",
+      verifyEmailResend: "Resend verification email",
+      verifyEmailSent: "Verification email sent.",
+      verifyEmailRefresh: "I've verified — refresh",
     },
     stages: {
       received: "Request received",
@@ -712,7 +789,24 @@ const translations: Record<Locale, Dict> = {
       quickLinks: "Quick Links",
       company: "Company",
     },
-    common: { backHome: "Back to home" },
+    common: { backHome: "Back to home", loading: "Loading..." },
+    errors: {
+      boundaryHeading: "Something went wrong",
+      boundaryBody: "Sorry about that. Try again, or head back home.",
+      tryAgain: "Try again",
+    },
+    errorsPage: {
+      heading: "Error log",
+      subheading: "Technical errors that happened on the site, logged automatically — for troubleshooting only.",
+      empty: "No errors recorded.",
+      dismiss: "Dismiss",
+      navLink: "Error log",
+      claimsHeading: "WhatsApp import claim log",
+      claimsSubheading: "Every time a pre-imported WhatsApp conversation got linked to a new student account — check here if you suspect a number got linked to the wrong account.",
+      claimsEmpty: "No import claims yet.",
+      claimedBy: "Claimed by account",
+      claimMessages: "message(s)",
+    },
     chat: {
       heading: "Messages",
       placeholder: "Type a message...",
@@ -762,6 +856,8 @@ const translations: Record<Locale, Dict> = {
       actionFailed: "Couldn't complete that action — try again.",
       actionPending: "Working...",
       importPhoneLabel: "Student's phone number (WhatsApp)",
+      importPhoneHint: "Include the country code, e.g. 9665XXXXXXXX — the same format the student will use when signing up.",
+      importPhoneImplausible: "That phone number looks too short — make sure to include the country code.",
       importNameHintLabel: "Student name (for your own reference only)",
     },
     pendingImports: {
@@ -786,35 +882,44 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue | null>(null);
 const KEY = "st_locale";
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>("ar");
+// No live cross-tab sync needed, so subscribe is a no-op — useSyncExternalStore is used purely
+// for its SSR-safe read: server snapshot ("ar") on the first pass, resynced to the real stored
+// value before paint, with no flash-of-wrong-locale and no setState-in-effect.
+function subscribe() {
+  return () => {};
+}
+function getSnapshot(): Locale {
+  try {
+    const stored = window.localStorage.getItem(KEY);
+    if (stored === "ar" || stored === "en") return stored;
+  } catch {
+    // ignore
+  }
+  return "ar";
+}
+function getServerSnapshot(): Locale {
+  return "ar";
+}
 
-  // Sync from storage on mount only — must not also write here, or it races
-  // with the effect below and clobbers a stored preference back to the default.
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(KEY);
-      if (stored === "ar" || stored === "en") setLocale(stored);
-    } catch {
-      // ignore
-    }
-  }, []);
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const persisted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [override, setOverride] = useState<Locale | null>(null);
+  const locale = override ?? persisted;
 
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
   }, [locale]);
 
-  const toggleLocale = () =>
-    setLocale((l) => {
-      const next = l === "ar" ? "en" : "ar";
-      try {
-        window.localStorage.setItem(KEY, next);
-      } catch {
-        // ignore
-      }
-      return next;
-    });
+  const toggleLocale = () => {
+    const next = locale === "ar" ? "en" : "ar";
+    try {
+      window.localStorage.setItem(KEY, next);
+    } catch {
+      // ignore
+    }
+    setOverride(next);
+  };
 
   return (
     <I18nContext.Provider

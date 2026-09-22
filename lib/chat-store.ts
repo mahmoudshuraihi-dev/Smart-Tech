@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth, db, storage } from "./firebase";
-import { ChatAttachment, ChatMessage, ChatRole, Conversation, PaymentStatus } from "./mock-data";
+import { ChatAttachment, ChatMessage, ChatRole, Conversation, PaymentStatus } from "./models";
 
 const CONVERSATIONS = "conversations";
 const BATCH_LIMIT = 500;

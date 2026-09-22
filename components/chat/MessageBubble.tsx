@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n";
-import type { ChatMessage } from "@/lib/mock-data";
+import type { ChatMessage } from "@/lib/models";
 import { IconFile } from "@/components/icons";
 
 function formatSize(bytes: number): string {

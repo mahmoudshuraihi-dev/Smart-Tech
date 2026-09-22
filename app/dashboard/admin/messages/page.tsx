@@ -8,7 +8,7 @@ import ChatThread from "@/components/chat/ChatThread";
 import ConversationList from "@/components/chat/ConversationList";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { type Conversation } from "@/lib/mock-data";
+import { type Conversation } from "@/lib/models";
 import { subscribeToAllConversations } from "@/lib/chat-store";
 import { useClientDirectory, getClientName } from "@/lib/user-directory";
 import { IconWhatsapp } from "@/components/icons";

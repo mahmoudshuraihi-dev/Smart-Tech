@@ -93,6 +93,9 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!ready || !session.role) {
+      // Resets the stale count when the session/role disappears (e.g. on logout); fires at most
+      // once per auth transition, not in a loop, so there's no cascading-render risk here.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUnread(0);
       return;
     }

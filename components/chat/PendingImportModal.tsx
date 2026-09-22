@@ -5,9 +5,9 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 import { useI18n } from "@/lib/i18n";
-import type { ChatAttachment, ChatMessage, ChatRole } from "@/lib/mock-data";
-import { MAX_ATTACHMENT_BYTES } from "@/lib/mock-data";
-import { normalizePhone } from "@/lib/phone";
+import type { ChatAttachment, ChatMessage, ChatRole } from "@/lib/models";
+import { MAX_ATTACHMENT_BYTES } from "@/lib/models";
+import { normalizePhone, isPlausiblePhone } from "@/lib/phone";
 import { savePendingImport } from "@/lib/pending-import-store";
 import { loadWhatsAppExport, type ParsedWhatsAppMessage } from "@/lib/whatsapp-import";
 import { IconClose, IconWhatsapp } from "@/components/icons";
@@ -92,6 +92,10 @@ export default function PendingImportModal({
     if (!file) return;
     if (!phone.trim()) {
       setError(t.chat.importPhoneLabel);
+      return;
+    }
+    if (!isPlausiblePhone(normalizePhone(phone))) {
+      setError(t.chat.importPhoneImplausible);
       return;
     }
 
@@ -223,9 +227,11 @@ export default function PendingImportModal({
                     id="pending-phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
+                    placeholder="9665XXXXXXXX"
                     className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:border-mark"
                     dir="ltr"
                   />
+                  <p className="mt-1 text-[11px] text-muted">{t.chat.importPhoneHint}</p>
                 </div>
 
                 <div>

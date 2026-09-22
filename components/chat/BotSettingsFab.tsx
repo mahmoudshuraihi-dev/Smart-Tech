@@ -3,7 +3,7 @@
 import { useEffect, useState, FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
-import type { AutoReplyRule } from "@/lib/mock-data";
+import type { AutoReplyRule } from "@/lib/models";
 import { getBotSettingsOnce, updateWelcomeMessage, addRule, updateRule, deleteRule } from "@/lib/bot-store";
 import { IconBot, IconClose, IconEdit } from "@/components/icons";
 
@@ -26,6 +26,10 @@ export default function BotSettingsFab() {
   };
 
   useEffect(() => {
+    // Fetch-on-open: loads the latest bot settings each time the panel opens. Fires at most
+    // once per open/close toggle, not in a loop; there's no data-fetching library in this
+    // project to route it through instead (see lib/bot-store.ts's plain getBotSettingsOnce()).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (open) refresh();
   }, [open]);
 

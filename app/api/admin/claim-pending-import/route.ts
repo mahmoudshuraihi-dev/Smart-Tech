@@ -3,6 +3,7 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { getAdminApp } from "@/lib/firebase-admin";
+import { normalizePhone, isPlausiblePhone } from "@/lib/phone";
 
 // Despite living under the same "admin" API folder as delete-user, this route is callable by
 // any freshly-authenticated user about their OWN phone number, not just admins — a student
@@ -51,8 +52,8 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => null);
-  const phone = typeof body?.phone === "string" ? body.phone.replace(/\D/g, "") : "";
-  if (!phone) {
+  const phone = typeof body?.phone === "string" ? normalizePhone(body.phone) : "";
+  if (!isPlausiblePhone(phone)) {
     return Response.json({ error: "missing phone" }, { status: 400 });
   }
 
@@ -113,6 +114,26 @@ export async function POST(request: Request) {
         unreadForClient: 0,
         unreadForAdmin: 0,
       });
+    }
+  }
+
+  if (migrated.length > 0) {
+    // Best-effort audit trail: normalizePhone is digits-only with no country-code awareness
+    // (see lib/phone.ts), so two different people's numbers could in theory collide and this
+    // claim could attach a stranger's private history to the wrong new account. This log lets
+    // an admin later see which uid absorbed which phone's history and when, so a wrong claim
+    // is at least detectable and correctable after the fact. A failure here must never block
+    // the actual claim/migration above, which has already committed.
+    try {
+      await db.collection("pendingImportClaims").add({
+        phone,
+        claimedByUid: callerUid,
+        messageCount: migrated.length,
+        studentNameHint: pendingSnap.data()?.studentNameHint ?? null,
+        claimedAt: new Date().toISOString(),
+      });
+    } catch {
+      // ignore
     }
   }
 

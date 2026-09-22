@@ -1,6 +1,6 @@
 "use client";
 
-import { STAGES, StageEvent, Stage } from "@/lib/mock-data";
+import { STAGES, StageEvent, Stage } from "@/lib/models";
 import { useI18n } from "@/lib/i18n";
 import { IconCheck, IconClock } from "./icons";
 
