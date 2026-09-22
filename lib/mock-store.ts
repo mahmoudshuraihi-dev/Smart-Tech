@@ -4,11 +4,12 @@ import {
   addDoc,
   collection,
   doc,
-  getDoc,
   onSnapshot,
   orderBy,
   query,
   runTransaction,
+  serverTimestamp,
+  Timestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -17,10 +18,24 @@ import { ProjectRequest, STAGES, ServiceId } from "./mock-data";
 
 const COLLECTION = "requests";
 
+// createdAt is written with serverTimestamp() so requests from different students' devices
+// sort correctly regardless of any single device's clock — see lib/chat-store.ts's toIso for
+// the same pattern applied to chat ordering, which is where this defect was first found.
+function toIso(value: unknown): string {
+  if (value instanceof Timestamp) return value.toDate().toISOString();
+  if (typeof value === "string") return value;
+  return new Date().toISOString();
+}
+
 export function subscribeToAllRequests(cb: (list: ProjectRequest[]) => void): () => void {
   const q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
   return onSnapshot(q, (snap) => {
-    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ProjectRequest));
+    cb(
+      snap.docs.map((d) => {
+        const data = d.data();
+        return { id: d.id, ...data, createdAt: toIso(data.createdAt) } as ProjectRequest;
+      }),
+    );
   });
 }
 
@@ -34,7 +49,12 @@ export function subscribeToRequestsForClient(
     orderBy("createdAt", "desc"),
   );
   return onSnapshot(q, (snap) => {
-    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ProjectRequest));
+    cb(
+      snap.docs.map((d) => {
+        const data = d.data();
+        return { id: d.id, ...data, createdAt: toIso(data.createdAt) } as ProjectRequest;
+      }),
+    );
   });
 }
 
@@ -62,14 +82,13 @@ export async function attachFile(id: string, fileName: string): Promise<void> {
 
 export async function createRequest(clientId: string, serviceId: ServiceId): Promise<ProjectRequest> {
   const now = new Date().toISOString();
-  const data = {
+  const history = [{ stage: "received" as const, at: now }];
+  const ref = await addDoc(collection(db, COLLECTION), {
     clientId,
     serviceId,
-    createdAt: now,
+    createdAt: serverTimestamp(),
     stage: "received" as const,
-    history: [{ stage: "received" as const, at: now }],
-  };
-  const ref = await addDoc(collection(db, COLLECTION), data);
-  const snap = await getDoc(ref);
-  return { id: ref.id, ...snap.data() } as ProjectRequest;
+    history,
+  });
+  return { id: ref.id, clientId, serviceId, createdAt: now, stage: "received", history };
 }

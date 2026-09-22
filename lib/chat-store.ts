@@ -8,7 +8,9 @@ import {
   onSnapshot,
   orderBy,
   query,
+  serverTimestamp,
   setDoc,
+  Timestamp,
   updateDoc,
   writeBatch,
 } from "firebase/firestore";
@@ -23,6 +25,17 @@ function sanitizeFileName(name: string): string {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
+// sort-relevant timestamps are written with serverTimestamp() so ordering across different
+// devices is authoritative (Firestore's server clock), never a possibly-skewed client clock —
+// this converts the resulting Timestamp back to the ISO string shape the rest of the app
+// expects. A still-pending write reads back as null for a brief instant before the server
+// confirms it; old data written before this existed is already a plain ISO string.
+function toIso(value: unknown): string {
+  if (value instanceof Timestamp) return value.toDate().toISOString();
+  if (typeof value === "string") return value;
+  return new Date().toISOString();
+}
+
 function conversationRef(id: string) {
   return doc(db, CONVERSATIONS, id);
 }
@@ -33,35 +46,48 @@ function messagesCollection(conversationId: string) {
 
 export function subscribeToConversation(id: string, cb: (c: Conversation | null) => void): () => void {
   return onSnapshot(conversationRef(id), (snap) => {
-    cb(snap.exists() ? ({ id: snap.id, ...snap.data() } as Conversation) : null);
+    if (!snap.exists()) {
+      cb(null);
+      return;
+    }
+    const data = snap.data();
+    cb({ id: snap.id, ...data, lastMessageAt: toIso(data.lastMessageAt) } as Conversation);
   });
 }
 
 export function subscribeToAllConversations(cb: (list: Conversation[]) => void): () => void {
   const q = query(collection(db, CONVERSATIONS), orderBy("lastMessageAt", "desc"));
   return onSnapshot(q, (snap) => {
-    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Conversation));
+    cb(
+      snap.docs.map((d) => {
+        const data = d.data();
+        return { id: d.id, ...data, lastMessageAt: toIso(data.lastMessageAt) } as Conversation;
+      }),
+    );
   });
 }
 
 export async function getOrCreateClientConversation(clientId: string): Promise<Conversation> {
   const ref = conversationRef(clientId);
   const snap = await getDoc(ref);
-  if (snap.exists()) return { id: snap.id, ...snap.data() } as Conversation;
+  if (snap.exists()) {
+    const data = snap.data();
+    return { id: snap.id, ...data, lastMessageAt: toIso(data.lastMessageAt) } as Conversation;
+  }
 
   const now = new Date().toISOString();
-  const conv: Omit<Conversation, "id"> = {
+  const conv = {
     clientId,
     lastReadByClient: now,
     lastReadByAdmin: now,
-    paymentStatus: "unpaid",
-    lastMessageAt: now,
+    paymentStatus: "unpaid" as const,
+    lastMessageAt: serverTimestamp(),
     lastMessagePreview: "",
     unreadForClient: 0,
     unreadForAdmin: 0,
   };
   await setDoc(ref, conv);
-  return { id: clientId, ...conv };
+  return { id: clientId, ...conv, lastMessageAt: now };
 }
 
 export async function setPaymentStatus(conversationId: string, status: PaymentStatus): Promise<void> {
@@ -71,7 +97,12 @@ export async function setPaymentStatus(conversationId: string, status: PaymentSt
 export function subscribeToMessages(conversationId: string, cb: (msgs: ChatMessage[]) => void): () => void {
   const q = query(messagesCollection(conversationId), orderBy("sentAt", "asc"));
   return onSnapshot(q, (snap) => {
-    cb(snap.docs.map((d) => ({ id: d.id, conversationId, ...d.data() }) as ChatMessage));
+    cb(
+      snap.docs.map((d) => {
+        const data = d.data();
+        return { id: d.id, conversationId, ...data, sentAt: toIso(data.sentAt) } as ChatMessage;
+      }),
+    );
   });
 }
 
@@ -82,18 +113,17 @@ export async function sendMessage(
   text?: string,
   attachment?: ChatAttachment,
 ): Promise<void> {
-  const sentAt = new Date().toISOString();
   const msgRef = doc(messagesCollection(conversationId));
   const batch = writeBatch(db);
 
-  const msgData: Record<string, unknown> = { senderId, senderRole, sentAt };
+  const msgData: Record<string, unknown> = { senderId, senderRole, sentAt: serverTimestamp() };
   if (text) msgData.text = text;
   if (attachment) msgData.attachment = attachment;
   batch.set(msgRef, msgData);
 
   const otherRoleUnreadField = senderRole === "admin" ? "unreadForClient" : "unreadForAdmin";
   batch.update(conversationRef(conversationId), {
-    lastMessageAt: sentAt,
+    lastMessageAt: serverTimestamp(),
     lastMessagePreview: text ?? attachment?.name ?? "",
     [otherRoleUnreadField]: increment(1),
   });
@@ -154,8 +184,8 @@ export async function importMessages(
   // (the admin already knows about a chat they just imported themselves)
   const latest = messages.reduce((max, m) => (m.sentAt > max.sentAt ? m : max), messages[0]);
   const snap = await getDoc(conversationRef(conversationId));
-  const current = snap.data() as Conversation | undefined;
-  if (!current || latest.sentAt > current.lastMessageAt) {
+  const currentLastMessageAt = snap.exists() ? toIso(snap.data().lastMessageAt) : null;
+  if (!currentLastMessageAt || latest.sentAt > currentLastMessageAt) {
     await updateDoc(conversationRef(conversationId), {
       lastMessageAt: latest.sentAt,
       lastMessagePreview: latest.text ?? latest.attachment?.name ?? "",
