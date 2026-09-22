@@ -33,6 +33,23 @@ export const SERVICE_IDS = [
 
 export type ServiceId = (typeof SERVICE_IDS)[number];
 
+export type BookingStatus = "new" | "contacted";
+
+// A public, no-account lead: name + phone + desired service, submitted from the homepage
+// booking form (app/api/bookings/route.ts) with no signup required. Deliberately separate
+// from ProjectRequest/`requests` — that flow is for signed-up clients tracking a project
+// through stages; this is just a contact-me-back lead for the business to follow up on.
+export interface BookingLead {
+  id: string;
+  name: string;
+  phone: string;
+  phoneNormalized: string;
+  serviceId: ServiceId;
+  status: BookingStatus;
+  locale: "ar" | "en";
+  createdAt: string;
+}
+
 export type ChatRole = "client" | "admin";
 
 // sentinel senderId for the automated welcome/FAQ auto-reply — a real client's own browser

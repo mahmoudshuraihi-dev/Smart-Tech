@@ -33,6 +33,19 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // public lead-capture: writes only ever happen server-side via firebase-admin in
+    // app/api/bookings/route.ts (which bypasses these rules, verified by Turnstile + a
+    // honeypot there instead) — no unauthenticated or client-role write path exists here.
+    // The admin's new/contacted toggle goes through the normal client SDK, same shape as
+    // the `users` allow-list above, so only that one field is left updatable directly.
+    match /bookings/{id} {
+      allow read: if isAdmin();
+      allow create: if false;
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+      allow delete: if false;
+    }
+
     match /conversations/{convId} {
       allow read: if isSignedIn() && (convId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && convId == request.auth.uid
