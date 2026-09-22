@@ -12,6 +12,7 @@ import LoginVideoBackground from "@/components/LoginVideoBackground";
 import {
   IconArrow,
   IconUser,
+  IconPhone,
   IconMail,
   IconLock,
   IconEye,
@@ -40,6 +41,7 @@ function LoginInner() {
 
   const [mode, setMode] = useState<Mode>("login");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -87,7 +89,9 @@ function LoginInner() {
     setErrorKey(null);
 
     const result =
-      mode === "signup" ? await signup(name.trim(), email, password, remember) : await login(email, password, remember);
+      mode === "signup"
+        ? await signup(name.trim(), phone.trim(), email, password, remember)
+        : await login(email, password, remember);
 
     setSubmitting(false);
     if (!result.ok) {
@@ -122,23 +126,44 @@ function LoginInner() {
 
           <form onSubmit={handleSubmit} className="mt-4 space-y-2.5">
             {mode === "signup" && (
-              <div>
-                <label htmlFor="name" className="block text-xs font-semibold mb-1 text-night-foreground/80">
-                  {t.login.nameLabel}
-                </label>
-                <div className="relative">
-                  <IconUser className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-night-foreground/40" />
-                  <input
-                    id="name"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full rounded-lg border border-night-foreground/15 bg-night-foreground/5 ps-10 pe-3 py-2 text-sm text-night-foreground placeholder-night-foreground/30 outline-none focus-visible:border-[color:var(--logo-blue)] transition-colors"
-                    autoComplete="name"
-                  />
+              <>
+                <div>
+                  <label htmlFor="name" className="block text-xs font-semibold mb-1 text-night-foreground/80">
+                    {t.login.nameLabel}
+                  </label>
+                  <div className="relative">
+                    <IconUser className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-night-foreground/40" />
+                    <input
+                      id="name"
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full rounded-lg border border-night-foreground/15 bg-night-foreground/5 ps-10 pe-3 py-2 text-sm text-night-foreground placeholder-night-foreground/30 outline-none focus-visible:border-[color:var(--logo-blue)] transition-colors"
+                      autoComplete="name"
+                    />
+                  </div>
                 </div>
-              </div>
+
+                <div>
+                  <label htmlFor="phone" className="block text-xs font-semibold mb-1 text-night-foreground/80">
+                    {t.login.phoneLabel}
+                  </label>
+                  <div className="relative">
+                    <IconPhone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-night-foreground/40" />
+                    <input
+                      id="phone"
+                      type="tel"
+                      required
+                      dir="ltr"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full rounded-lg border border-night-foreground/15 bg-night-foreground/5 ps-10 pe-3 py-2 text-sm text-night-foreground placeholder-night-foreground/30 outline-none focus-visible:border-[color:var(--logo-blue)] transition-colors"
+                      autoComplete="tel"
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             <div>

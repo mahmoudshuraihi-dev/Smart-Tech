@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import ChatThread from "@/components/chat/ChatThread";
 import ConversationList from "@/components/chat/ConversationList";
@@ -10,6 +11,7 @@ import { useI18n } from "@/lib/i18n";
 import { type Conversation } from "@/lib/mock-data";
 import { subscribeToAllConversations } from "@/lib/chat-store";
 import { useClientDirectory, getClientName } from "@/lib/user-directory";
+import { IconWhatsapp } from "@/components/icons";
 
 export default function AdminMessagesPage() {
   const { session, ready } = useAuth();
@@ -39,7 +41,16 @@ export default function AdminMessagesPage() {
         <div className="mx-auto max-w-6xl h-[calc(100vh-72px)] sm:py-4">
           <div className="card h-full min-h-0 sm:rounded-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-[320px_1fr]">
             <div className={`${selected ? "hidden lg:block" : "block"} border-e-0 lg:border-e border-line h-full overflow-y-auto`}>
-              <p className="px-4 py-3.5 text-sm font-semibold border-b border-line">{t.chat.heading}</p>
+              <div className="flex items-center justify-between px-4 py-3.5 border-b border-line">
+                <p className="text-sm font-semibold">{t.chat.heading}</p>
+                <Link
+                  href="/dashboard/admin/whatsapp-import"
+                  aria-label={t.pendingImports.heading}
+                  className="text-muted hover:text-mark transition-colors"
+                >
+                  <IconWhatsapp className="h-4 w-4" />
+                </Link>
+              </div>
               <ConversationList
                 conversations={conversations}
                 directory={directory}

@@ -27,7 +27,7 @@ interface AuthContextValue {
   session: Session;
   ready: boolean;
   login: (email: string, password: string, remember?: boolean) => Promise<AuthResult>;
-  signup: (name: string, email: string, password: string, remember?: boolean) => Promise<AuthResult>;
+  signup: (name: string, phone: string, email: string, password: string, remember?: boolean) => Promise<AuthResult>;
   logout: () => Promise<void>;
 }
 
@@ -94,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signup = async (
     name: string,
+    phone: string,
     email: string,
     password: string,
     remember = false,
@@ -104,9 +105,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await setDoc(doc(db, "users", cred.user.uid), {
         role: "client",
         name,
+        phone,
         email: email.trim().toLowerCase(),
         createdAt: new Date().toISOString(),
       });
+
+      // best-effort: if this student's WhatsApp history was pre-imported by phone number before
+      // they signed up, pull it into their brand-new conversation now, before we redirect them —
+      // a failure here shouldn't block signup itself
+      try {
+        const idToken = await cred.user.getIdToken();
+        await fetch("/api/admin/claim-pending-import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+          body: JSON.stringify({ phone }),
+        });
+      } catch {
+        // ignore — worst case the student just starts with an empty conversation
+      }
+
       return { ok: true, id: cred.user.uid };
     } catch (e) {
       return { ok: false, error: mapAuthError(e) };

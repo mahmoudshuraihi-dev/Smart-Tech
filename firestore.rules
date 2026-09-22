@@ -15,7 +15,7 @@ service cloud.firestore {
       allow list: if isAdmin(); // admin lists all clients for the name directory
       allow create: if isSelf(uid)
         && request.resource.data.role == 'client'          // self-registration can NEVER set admin
-        && request.resource.data.keys().hasOnly(['role', 'name', 'email', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['role', 'name', 'email', 'createdAt', 'phone'])
         && request.resource.data.name is string
         && request.resource.data.email is string;
       allow update: if isSelf(uid)
@@ -75,6 +75,17 @@ service cloud.firestore {
     match /config/botSettings {
       allow read: if isSignedIn();  // clients need this to run findFaqMatch locally
       allow write: if isAdmin();
+    }
+
+    // holding area for WhatsApp history imported before the matching student has signed up —
+    // fully admin-gated; the signup-side claim happens through a privileged server route
+    // (app/api/admin/claim-pending-import) using the Admin SDK, which bypasses these rules,
+    // so no rule here needs to let a stranger read by guessing a phone number
+    match /pendingImports/{phone} {
+      allow read, write: if isAdmin();
+      match /messages/{msgId} {
+        allow read, write: if isAdmin();
+      }
     }
   }
 }

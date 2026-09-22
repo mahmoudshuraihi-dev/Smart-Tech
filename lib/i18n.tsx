@@ -80,6 +80,7 @@ export interface Dict {
     subheading: string;
     subheadingSignup: string;
     nameLabel: string;
+    phoneLabel: string;
     emailLabel: string;
     passwordLabel: string;
     submit: string;
@@ -176,6 +177,17 @@ export interface Dict {
     deleteAccountConfirm: string;
     actionFailed: string;
     actionPending: string;
+    importPhoneLabel: string;
+    importNameHintLabel: string;
+  };
+  pendingImports: {
+    heading: string;
+    subheading: string;
+    backToMessages: string;
+    add: string;
+    empty: string;
+    phone: string;
+    messageCount: string;
   };
 }
 
@@ -385,6 +397,7 @@ const translations: Record<Locale, Dict> = {
       subheading: "ادخل بياناتك لمتابعة طلباتك أو إدارتها.",
       subheadingSignup: "أنشئ حسابًا لمتابعة طلباتك والتواصل مع فريقنا.",
       nameLabel: "الاسم",
+      phoneLabel: "رقم الهاتف",
       emailLabel: "البريد الإلكتروني",
       passwordLabel: "كلمة المرور",
       submit: "دخول",
@@ -492,6 +505,17 @@ const translations: Record<Locale, Dict> = {
       deleteAccountConfirm: "رح يتم حذف حساب هذا الطالب بالكامل نهائيًا — تسجيل الدخول، بياناته، محادثته، وكل طلباته. هذا الإجراء ما ممكن التراجع عنه أبدًا.",
       actionFailed: "تعذّر تنفيذ الإجراء، حاول مرة أخرى.",
       actionPending: "جارٍ التنفيذ...",
+      importPhoneLabel: "رقم هاتف الطالب (واتساب)",
+      importNameHintLabel: "اسم الطالب (للتنظيم عندك فقط)",
+    },
+    pendingImports: {
+      heading: "استيراد محادثات واتساب مسبقًا",
+      subheading: "لطلاب لسا ما سجلو حساب — رح تنربط المحادثة تلقائيًا أول ما يسجلو بنفس رقم الهاتف.",
+      backToMessages: "الرجوع للمحادثات",
+      add: "إضافة محادثة",
+      empty: "لا توجد محادثات بانتظار الربط.",
+      phone: "رقم الهاتف",
+      messageCount: "عدد الرسائل",
     },
   },
   en: {
@@ -629,6 +653,7 @@ const translations: Record<Locale, Dict> = {
       subheading: "Enter your details to track or manage requests.",
       subheadingSignup: "Create an account to track requests and message our team.",
       nameLabel: "Name",
+      phoneLabel: "Phone number",
       emailLabel: "Email",
       passwordLabel: "Password",
       submit: "Log In",
@@ -736,6 +761,17 @@ const translations: Record<Locale, Dict> = {
       deleteAccountConfirm: "This permanently deletes this student's entire account — their login, profile, conversation, and every request. This cannot be undone.",
       actionFailed: "Couldn't complete that action — try again.",
       actionPending: "Working...",
+      importPhoneLabel: "Student's phone number (WhatsApp)",
+      importNameHintLabel: "Student name (for your own reference only)",
+    },
+    pendingImports: {
+      heading: "Pre-import WhatsApp chats",
+      subheading: "For students who haven't signed up yet — this links automatically the moment they sign up with the same phone number.",
+      backToMessages: "Back to messages",
+      add: "Add conversation",
+      empty: "No conversations waiting to be linked.",
+      phone: "Phone",
+      messageCount: "Messages",
     },
   },
 };
