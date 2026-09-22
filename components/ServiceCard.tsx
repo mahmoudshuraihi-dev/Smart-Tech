@@ -5,15 +5,23 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n, ServiceCopy } from "@/lib/i18n";
 import { createRequest } from "@/lib/mock-store";
-import { IconArrow } from "./icons";
-import { SERVICE_ICONS } from "./service-icons";
+import { IconEdit, IconChart, IconCompass, IconBooks, IconClock, IconArrow } from "./icons";
+
+const ICONS: Record<string, typeof IconEdit> = {
+  editing: IconEdit,
+  statistics: IconChart,
+  methodology: IconCompass,
+  literature: IconBooks,
+  formatting: IconEdit,
+  coaching: IconClock,
+};
 
 export default function ServiceCard({ service }: { service: ServiceCopy }) {
   const { t } = useI18n();
   const { session } = useAuth();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
-  const Icon = SERVICE_ICONS[service.id];
+  const Icon = ICONS[service.id] ?? IconEdit;
 
   const handleRequest = async () => {
     if (!session.role) {

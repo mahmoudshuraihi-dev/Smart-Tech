@@ -127,36 +127,6 @@ export interface Dict {
     timeline: string;
     doneAll: string;
   };
-  booking: {
-    heading: string;
-    subheading: string;
-    nameLabel: string;
-    phoneLabel: string;
-    serviceLabel: string;
-    submit: string;
-    successHeading: string;
-    successBody: string;
-    submitAnother: string;
-    errorGeneric: string;
-    errorNetwork: string;
-    errorCaptcha: string;
-    privacyNote: string;
-  };
-  dashboardBookings: {
-    heading: string;
-    subheading: string;
-    columnName: string;
-    columnPhone: string;
-    columnService: string;
-    columnSubmitted: string;
-    columnStatus: string;
-    statusNew: string;
-    statusContacted: string;
-    markContacted: string;
-    markNew: string;
-    empty: string;
-    bookingsLink: string;
-  };
   footer: { rights: string; tagline: string; quickLinks: string; company: string };
   common: { backHome: string };
   chat: {
@@ -480,36 +450,6 @@ const translations: Record<Locale, Dict> = {
       timeline: "السجل الزمني",
       doneAll: "اكتمل الطلب بجميع مراحله.",
     },
-    booking: {
-      heading: "تحتاج خدمة الآن؟ اترك رقمك وبنرجع نتصل فيك",
-      subheading: "بدون تسجيل حساب. عبّي اسمك ورقمك واختر الخدمة، وفريقنا يتواصل معك خلال ساعات.",
-      nameLabel: "الاسم",
-      phoneLabel: "رقم الهاتف",
-      serviceLabel: "أي خدمة بتحتاج؟",
-      submit: "إرسال الطلب",
-      successHeading: "استلمنا طلبك",
-      successBody: "بنتواصل معك على رقمك خلال ساعات لتحديد التفاصيل.",
-      submitAnother: "إرسال طلب آخر",
-      errorGeneric: "حدث خطأ غير متوقع، حاول مرة أخرى.",
-      errorNetwork: "تعذّر الاتصال بالخادم، تحقق من اتصالك بالإنترنت.",
-      errorCaptcha: "تعذّر التحقق أنك لست روبوتًا، حاول مرة أخرى.",
-      privacyNote: "بياناتك تُستخدم فقط للتواصل معك بخصوص هذا الطلب.",
-    },
-    dashboardBookings: {
-      heading: "طلبات الحجز",
-      subheading: "كل من ترك رقمه لطلب خدمة بدون تسجيل حساب.",
-      columnName: "الاسم",
-      columnPhone: "الهاتف",
-      columnService: "الخدمة",
-      columnSubmitted: "تاريخ الطلب",
-      columnStatus: "الحالة",
-      statusNew: "جديد",
-      statusContacted: "تم التواصل",
-      markContacted: "تحديد كـ«تم التواصل»",
-      markNew: "إرجاع إلى «جديد»",
-      empty: "لا توجد طلبات حجز بعد.",
-      bookingsLink: "عرض طلبات الحجز",
-    },
     footer: {
       rights: "جميع الحقوق محفوظة",
       tagline: "استشارات أكاديمية وبحثية متكاملة تدعم عملك الخاص.",
@@ -765,36 +705,6 @@ const translations: Record<Locale, Dict> = {
       fileAttached: "File attached",
       timeline: "Timeline",
       doneAll: "This request has completed every stage.",
-    },
-    booking: {
-      heading: "Need a service now? Leave your number and we'll call you",
-      subheading: "No account needed. Add your name, phone, and the service you want — our team reaches out within hours.",
-      nameLabel: "Name",
-      phoneLabel: "Phone number",
-      serviceLabel: "Which service do you need?",
-      submit: "Send request",
-      successHeading: "We got your request",
-      successBody: "We'll reach out on your number within a few hours to sort out the details.",
-      submitAnother: "Send another request",
-      errorGeneric: "Something went wrong — please try again.",
-      errorNetwork: "Couldn't reach the server — check your internet connection.",
-      errorCaptcha: "Couldn't verify you're not a robot — please try again.",
-      privacyNote: "We only use your details to contact you about this request.",
-    },
-    dashboardBookings: {
-      heading: "Booking Requests",
-      subheading: "Everyone who left their number to request a service without an account.",
-      columnName: "Name",
-      columnPhone: "Phone",
-      columnService: "Service",
-      columnSubmitted: "Submitted",
-      columnStatus: "Status",
-      statusNew: "New",
-      statusContacted: "Contacted",
-      markContacted: "Mark as contacted",
-      markNew: "Mark as new",
-      empty: "No booking requests yet.",
-      bookingsLink: "View booking requests",
     },
     footer: {
       rights: "All rights reserved",
