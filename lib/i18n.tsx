@@ -420,7 +420,7 @@ const translations: Record<Locale, Dict> = {
       emailLabel: "البريد الإلكتروني",
       phoneLabel: "الهاتف",
       email: "hello@smarttech-consulting.com",
-      phone: "+966 50 000 0000",
+      phone: "+972 59 792 7632",
       socialLabel: "تابعنا",
     },
     login: {
@@ -708,7 +708,7 @@ const translations: Record<Locale, Dict> = {
       emailLabel: "Email",
       phoneLabel: "Phone",
       email: "hello@smarttech-consulting.com",
-      phone: "+966 50 000 0000",
+      phone: "+972 59 792 7632",
       socialLabel: "Follow us",
     },
     login: {
