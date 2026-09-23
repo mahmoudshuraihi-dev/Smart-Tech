@@ -22,6 +22,11 @@ export default function FooterTextEffect({
   useEffect(() => {
     if (!svgRef.current) return;
     const svgRect = svgRef.current.getBoundingClientRect();
+    // Zero-size rect happens when this element is `hidden` (display:none) below the `lg`
+    // breakpoint — see ContactFooter.tsx. The effect still runs on mount even while hidden,
+    // and dividing by a zero width/height produced "NaN%", which browsers reject as an
+    // invalid radialGradient cx/cy attribute (visible as a console error on every mobile load).
+    if (svgRect.width === 0 || svgRect.height === 0) return;
     const cxPercentage = ((cursor.x - svgRect.left) / svgRect.width) * 100;
     const cyPercentage = ((cursor.y - svgRect.top) / svgRect.height) * 100;
     setMaskPosition({ cx: `${cxPercentage}%`, cy: `${cyPercentage}%` });
