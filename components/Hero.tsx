@@ -12,7 +12,7 @@ export default function Hero() {
       <Reveal className="mx-auto max-w-4xl px-5 sm:px-8 pt-20 pb-24 sm:pt-28 sm:pb-32" stagger={100} y={28}>
         <p className="text-sm font-semibold text-mark">{t.hero.eyebrow}</p>
 
-        <h1 className="font-display mt-5 max-w-2xl text-4xl sm:text-6xl leading-[1.35]">
+        <h1 className="font-display mt-5 max-w-2xl text-4xl sm:text-6xl leading-[2]">
           {t.hero.title} {t.hero.highlight}
         </h1>
 
