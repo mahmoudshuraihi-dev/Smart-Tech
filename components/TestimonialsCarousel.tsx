@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import type { TestimonialCopy } from "@/lib/i18n";
+import { useI18n, type TestimonialCopy } from "@/lib/i18n";
 
 // Spring physics for the ring rotation — lower stiffness + a touch more damping
 // than a snappy UI spring so it glides into place instead of snapping (disabled
@@ -51,6 +51,7 @@ function getInitials(name: string) {
 }
 
 export default function TestimonialsCarousel({ items }: { items: TestimonialCopy[] }) {
+  const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const [rotation, setRotation] = useState(0);
   const [radius, setRadius] = useState(160);
@@ -180,7 +181,7 @@ export default function TestimonialsCarousel({ items }: { items: TestimonialCopy
       <div className="flex items-center gap-3 mt-6 sm:mt-8 z-[210]">
         <button
           type="button"
-          aria-label="Previous testimonial"
+          aria-label={t.a11y.previousTestimonial}
           onClick={() => rotateCarousel("left")}
           className={`flex items-center justify-center ${BUTTON_SIZE_CLASSES} rounded-full border border-line bg-paper-raised text-muted hover:text-mark hover:border-mark/50 transition-colors duration-200 active:scale-90 cursor-pointer`}
         >
@@ -188,7 +189,7 @@ export default function TestimonialsCarousel({ items }: { items: TestimonialCopy
         </button>
         <button
           type="button"
-          aria-label="Next testimonial"
+          aria-label={t.a11y.nextTestimonial}
           onClick={() => rotateCarousel("right")}
           className={`flex items-center justify-center ${BUTTON_SIZE_CLASSES} rounded-full border border-line bg-paper-raised text-muted hover:text-mark hover:border-mark/50 transition-colors duration-200 active:scale-90 cursor-pointer`}
         >

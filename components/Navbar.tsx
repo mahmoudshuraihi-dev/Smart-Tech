@@ -193,7 +193,7 @@ export default function Navbar() {
             <button
               onClick={toggleLocale}
               className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-muted hover:text-mark hover:border-mark/50 transition-colors"
-              aria-label="Toggle language"
+              aria-label={t.a11y.toggleLanguage}
             >
               <IconGlobe className="h-3.5 w-3.5" />
               {locale === "ar" ? "EN" : "AR"}
@@ -202,7 +202,7 @@ export default function Navbar() {
             <button
               onClick={toggleTheme}
               className="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-line text-muted hover:text-mark hover:border-mark/50 transition-colors"
-              aria-label="Toggle theme"
+              aria-label={t.a11y.toggleTheme}
             >
               <ThemeIcon theme={theme} reduce={reduceMotion} />
             </button>
@@ -247,7 +247,7 @@ export default function Navbar() {
           <button
             className="lg:hidden text-ink"
             onClick={() => setOpen((v) => !v)}
-            aria-label="Menu"
+            aria-label={t.a11y.menu}
             aria-expanded={open}
           >
             {open ? <IconClose className="h-6 w-6" /> : <IconMenu className="h-6 w-6" />}
@@ -272,7 +272,7 @@ export default function Navbar() {
               key="drawer"
               role="dialog"
               aria-modal="true"
-              aria-label="Menu"
+              aria-label={t.a11y.menu}
               className="site-header-mobile fixed inset-y-0 end-0 z-50 flex w-[82%] max-w-[320px] flex-col bg-paper border-s border-line lg:hidden"
               initial={{ x: dir === "rtl" ? -340 : 340 }}
               animate={{ x: 0 }}
@@ -284,7 +284,7 @@ export default function Navbar() {
                 <Logo size={34} />
                 <span className="font-display text-base tracking-tight">Smart Tech</span>
               </Link>
-              <button onClick={() => setOpen(false)} aria-label="Close menu" className="text-ink">
+              <button onClick={() => setOpen(false)} aria-label={t.a11y.closeMenu} className="text-ink">
                 <IconClose className="h-5 w-5" />
               </button>
             </div>
@@ -307,7 +307,7 @@ export default function Navbar() {
                 <button
                   onClick={toggleTheme}
                   className="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-line text-muted"
-                  aria-label="Toggle theme"
+                  aria-label={t.a11y.toggleTheme}
                 >
                   <ThemeIcon theme={theme} reduce={reduceMotion} />
                 </button>

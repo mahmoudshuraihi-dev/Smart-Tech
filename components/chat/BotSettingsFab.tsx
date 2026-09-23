@@ -158,14 +158,14 @@ export default function BotSettingsFab() {
                         <div className="flex items-center gap-1.5 shrink-0">
                           <button
                             onClick={() => handleEditRule(rule)}
-                            aria-label="Edit rule"
+                            aria-label={t.a11y.editRule}
                             className="text-muted hover:text-mark transition-colors"
                           >
                             <IconEdit className="h-3.5 w-3.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteRule(rule.id)}
-                            aria-label="Delete rule"
+                            aria-label={t.a11y.deleteRule}
                             className="text-muted hover:text-red-500 transition-colors"
                           >
                             <IconClose className="h-3.5 w-3.5" />

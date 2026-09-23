@@ -112,7 +112,7 @@ export default function ContactFooter() {
                       className="flex items-center gap-2.5 text-night-foreground/60 hover:text-night-foreground transition-colors"
                     >
                       <IconPhone className="h-4 w-4 shrink-0" />
-                      {t.contact.phone}
+                      <span dir="ltr">{t.contact.phone}</span>
                     </a>
                   </li>
                 </ul>

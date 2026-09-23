@@ -130,7 +130,7 @@ export default function ChatThread({
           {onBack && (
             <button
               onClick={onBack}
-              aria-label="Back"
+              aria-label={t.a11y.back}
               className="text-muted hover:text-ink transition-colors lg:hidden"
             >
               <IconArrow className="h-5 w-5 rotate-180 rtl:rotate-0" />

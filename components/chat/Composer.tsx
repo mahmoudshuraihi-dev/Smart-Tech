@@ -87,7 +87,7 @@ export default function Composer({
           <button
             type="button"
             onClick={removePending}
-            aria-label="Remove attachment"
+            aria-label={t.a11y.removeAttachment}
             className="text-muted hover:text-ink transition-colors"
           >
             <IconClose className="h-3.5 w-3.5" />

@@ -142,6 +142,18 @@ export interface Dict {
   };
   footer: { rights: string; tagline: string; quickLinks: string; company: string };
   common: { backHome: string; loading: string };
+  a11y: {
+    toggleLanguage: string;
+    toggleTheme: string;
+    menu: string;
+    closeMenu: string;
+    back: string;
+    editRule: string;
+    deleteRule: string;
+    removeAttachment: string;
+    previousTestimonial: string;
+    nextTestimonial: string;
+  };
   errors: {
     boundaryHeading: string;
     boundaryBody: string;
@@ -249,7 +261,7 @@ const SERVICES_AR: ServiceCopy[] = [
   {
     id: "formatting",
     title: "التنسيق والتوثيق العلمي",
-    description: "ضبط التنسيق والتوثيق وفق أنظمة APA وMLA وShicago وغيرها.",
+    description: "ضبط التنسيق والتوثيق وفق أنظمة APA وMLA وChicago وغيرها.",
   },
   {
     id: "coaching",
@@ -502,6 +514,18 @@ const translations: Record<Locale, Dict> = {
       company: "الشركة",
     },
     common: { backHome: "العودة للرئيسية", loading: "جارٍ التحميل..." },
+    a11y: {
+      toggleLanguage: "تبديل اللغة",
+      toggleTheme: "تبديل المظهر",
+      menu: "القائمة",
+      closeMenu: "إغلاق القائمة",
+      back: "رجوع",
+      editRule: "تعديل القاعدة",
+      deleteRule: "حذف القاعدة",
+      removeAttachment: "إزالة المرفق",
+      previousTestimonial: "الرأي السابق",
+      nextTestimonial: "الرأي التالي",
+    },
     errors: {
       boundaryHeading: "حدث خطأ غير متوقع",
       boundaryBody: "نعتذر عن الخلل. جرّب مرة أخرى، أو رجع للرئيسية.",
@@ -790,6 +814,18 @@ const translations: Record<Locale, Dict> = {
       company: "Company",
     },
     common: { backHome: "Back to home", loading: "Loading..." },
+    a11y: {
+      toggleLanguage: "Toggle language",
+      toggleTheme: "Toggle theme",
+      menu: "Menu",
+      closeMenu: "Close menu",
+      back: "Back",
+      editRule: "Edit rule",
+      deleteRule: "Delete rule",
+      removeAttachment: "Remove attachment",
+      previousTestimonial: "Previous testimonial",
+      nextTestimonial: "Next testimonial",
+    },
     errors: {
       boundaryHeading: "Something went wrong",
       boundaryBody: "Sorry about that. Try again, or head back home.",
